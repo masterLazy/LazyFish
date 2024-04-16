@@ -1,0 +1,2 @@
+# LazyFish
+Gobang AI
