@@ -15,6 +15,8 @@ LazyFish 尚未完善。
 
 `basic_fish.hpp` 实现了 BasicFish。
 
+`deep_fish.hpp` 实现了一个接口 `DeepFish`，允许用户加载和使用 DeepFish 模型。
+
 `dataset_maker.cpp` 是一个用于制造两个 BasicFish 之间互相对弈的数据集的程序。`dataset/` 下存储了用它制造的数据集（`.npz` 格式）
 
 `gui_demo.cpp` 是一个图形化下棋程序，要运行它，你需要安装 `mLib`（见我的仓库：[mLib](https://github.com/masterLazy/mLib)）。
