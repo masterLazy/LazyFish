@@ -50,7 +50,10 @@ namespace gobang
 	public:
 		std::array<std::array<int, 15>, 15> map;
 
-		Board() {}
+		Board()
+		{
+			clear();
+		}
 
 		bool empty()
 		{

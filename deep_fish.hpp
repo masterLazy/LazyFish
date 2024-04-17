@@ -32,6 +32,7 @@ namespace gobang
 	{
 	private:
 		size_t num_params;
+		c10::Device::Type device;
 	public:
 		torch::jit::script::Module model;
 		explicit DeepFish(std::string model_path)
@@ -39,42 +40,60 @@ namespace gobang
 			//加载模型
 			try
 			{
-				model = torch::jit::load("D:/model.pt");
+				model = torch::jit::load(model_path.c_str());
 			}
 			catch (const c10::Error& e)
 			{
-				std::cerr << "Error loading DeepFish model." << std::endl;
+				std::cerr << "[DeepFish] Error loading model: " << e.what() << std::endl;
+				exit(-1);
 			}
 			auto parameters = model.parameters();
-			// 计算参数总数
+			//计算参数总数
+			num_params = 0;
 			for (const auto& param : parameters)
 			{
 				num_params += param.numel();
 			}
 			if (torch::cuda::is_available())
 			{
-				model.to(c10::Device::Type::CUDA);
+				device = c10::Device::Type::CUDA;
+				model.to(device);
+			}
+			else
+			{
+				device = c10::Device::Type::CPU;
 			}
 		}
 
 		std::array<int, 2> play(Board bd, int self, bool fbd = true)
 		{
 			//准备输入
-			auto map = torch::zeros({ 1,15,15 });
+			auto map = torch::zeros({ 15,15 });
 			for (int x = 0; x < 15; x++)
 			{
 				for (int y = 0; y < 15; y++)
 				{
-					if (bd[x][y] == self)map[0][x][y] = 0.5;
-					else if (bd[x][y] == Invert(self))map[0][x][y] = 1;
+					if (bd[x][y] == self)map[x][y] = 0.5;
+					else if (bd[x][y] == Invert(self))map[x][y] = 1;
 				}
 			}
+			map = map.reshape({ 1,1,15,15 }).to(device);
 
 			//模型预测
-			auto pred = model({ map }).toTensor();
-			std::cout << "Shape of pred: " << pred.sizes() << std::endl;
+			c10::IValue pred;
+			try
+			{
+				pred = model({ map });
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "[DeepFish] Error predicting :" << e.what() << std::endl;
+				exit(-1);
+			}
+			auto pred_ = pred.toTensor();
 
 			//获得输出
+			float max_ = 0;
 			int _x = -1, _y = -1;
 			for (int x = 0; x < 15; x++)
 			{
@@ -82,12 +101,13 @@ namespace gobang
 				{
 					if (bd.is_able(x, y, self, fbd))
 					{
-						//if (_x == -1 || pred[0][x][y].item() > pred[0][_x][_y].item())
+						auto n = pred_[0][0][x][y].item().toFloat();
+						if (_x == -1 || n > max_)
 						{
 							_x = x;
 							_y = y;
 						}
-						//else if (m[x][y] == m[_x][_y] && rand() % 15 * 15 == 0)
+						else if (n == max_ && rand() % 15 * 15 == 0)
 						{
 							_x = x;
 							_y = y;
