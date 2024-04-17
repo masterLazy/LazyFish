@@ -15,7 +15,7 @@ LazyFish 尚未完善。
 
 `basic_fish.hpp` 实现了 BasicFish。
 
-`deep_fish.hpp` 实现了一个接口 `DeepFish`，允许用户加载和使用 DeepFish 模型。
+`deep_fish.hpp` 实现了一个接口 `DeepFish`，允许用户加载和使用 DeepFish 模型（必须是序列化后的 `.pt` 文件）。
 
 `dataset_maker.cpp` 是一个用于制造两个 BasicFish 之间互相对弈的数据集的程序。`dataset/` 下存储了用它制造的数据集（`.npz` 格式）
 
