@@ -23,7 +23,7 @@ LazyFish 尚未完善。
 
 ### 模型文件
 
-`model/` 下存储了 DeepFish 的模型文件（`.pth`）、序列化模型文件（'.pt'）和定义它们的 Python 源代码。
+`model/` 下存储了 DeepFish 的模型文件（`.pth`）、序列化模型文件（`.pt`）和定义它们的 Python 源代码。
 
 ## DeepFish 输入约定
 
