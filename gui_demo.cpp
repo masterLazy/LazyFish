@@ -1,37 +1,35 @@
-﻿#include <Windows.h>
+﻿//务必把这几个 #include 放在开头
+#include "gobang.hpp"
+#include "basic_fish.hpp"
+
+#include <Windows.h>
 #include <windowsx.h>
 #include <atomic>
 
 #include "../mLib/mGraphics.h"
 
-#include "gobang.hpp"
-#include "basic_fish.hpp"
-
-using namespace mlib;
-using namespace gobang;
-using namespace std;
 
 //五子棋
-Board board;
-BasicFish bf;
-int current_player = G_BLACK;
+gobang::Board board;
+gobang::BasicFish fish;
+int current_player = gobang::G_BLACK;
 
 //下棋AI的线程
 #define SG_NULL	0
 #define SG_PLAY	1
 #define SG_END	-1
-atomic<int> signal = SG_NULL;
-array<int, 2> predict = { -1,-1 };
+std::atomic<int> signal = SG_NULL;
+std::array<int, 2> predict = { -1,-1 };
 void th2func()
 {
 	while (signal != SG_END)
 	{
 		if (signal == SG_PLAY)
 		{
-			predict = bf.play(board, current_player, true);
-			//signal = SG_NULL;
+			predict = fish.play(board, current_player, true);
+			signal = SG_NULL;
 			board[predict[0]][predict[1]] = current_player;
-			current_player = Invert(current_player);
+			current_player = gobang::Invert(current_player);
 			if (board.is_end())
 			{
 				board.clear();
@@ -45,12 +43,13 @@ int cxWindow = 600, cyWindow = 700;
 
 void draw_board()
 {
+	using namespace mlib;
 	//明确绘图范围
 	float gap = cxWindow / 16.0;
 	Rect rect = { gap,cyWindow - 15 * gap,cxWindow - gap,cyWindow - gap };
 	//绘制通知
-	wstring notice;
-	if (current_player == G_BLACK)notice = L"Blank's turn.";
+	std::wstring notice;
+	if (current_player == gobang::G_BLACK)notice = L"Blank's turn.";
 	else notice = L"White's turn.";
 	if (signal == SG_PLAY)notice += L" Predicting. . .";
 	gfx.draw_text(cxWindow / 2.0, rect.top / 2.0, notice, gfx.brush(10, 10, 10), FontAlign::middle);
@@ -65,11 +64,11 @@ void draw_board()
 	{
 		for (int y = 0; y < 15; y++)
 		{
-			if (board[x][y] != G_EMPTY)
+			if (board[x][y] != gobang::G_EMPTY)
 			{
 				gfx.draw_circle(rect.left + gap * x, rect.top + gap * y, gap * 0.4, gfx.brush(0, 0, 0));
 				gfx.fill_circle(rect.left + gap * x, rect.top + gap * y, gap * 0.4,
-					board[x][y] == G_BLACK ? gfx.brush(50, 50, 50) : gfx.brush(250, 250, 250));
+					board[x][y] == gobang::G_BLACK ? gfx.brush(50, 50, 50) : gfx.brush(250, 250, 250));
 			}
 			/*else if (!board.is_able(x, y, G_BLACK))
 			{
@@ -103,7 +102,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	//m_hInstance = hInstance;//保存一下实例句柄
 
 	//第二线程
-	thread th2(th2func);
+	std::thread th2(th2func);
 	th2.detach();
 
 	wchar_t szAppName[] = L"五子棋";
@@ -186,7 +185,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		//明确范围
 		float gap = cxWindow / 16.0;
-		Rect rect = { gap,cyWindow - 15 * gap,cxWindow - gap,cyWindow - gap };
+		mlib::Rect rect = { gap,cyWindow - 15 * gap,cxWindow - gap,cyWindow - gap };
 		//落棋
 		for (int x = 0; x < 15; x++)
 		{
@@ -195,7 +194,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				if (abs(gfx.m_x - rect.left - gap * x) + abs(gfx.m_y - rect.top - gap * y) < gap / 2)
 				{
 					board[x][y] = current_player;
-					current_player = Invert(current_player);
+					current_player = gobang::Invert(current_player);
 					signal = SG_PLAY;
 				}
 			}
