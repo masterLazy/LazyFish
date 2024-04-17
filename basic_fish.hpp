@@ -3,6 +3,16 @@
 * basic_fish.hpp
 *****************************************************************************/
 
+#include "gobang.hpp"
+
+#ifndef max
+template<typename T>
+inline T max(T a, T b)
+{
+	return a > b ? a : b;
+}
+#endif
+
 namespace gobang
 {
 	class BasicFish :Fish

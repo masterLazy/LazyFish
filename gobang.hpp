@@ -1,13 +1,18 @@
 #pragma once
 /*****************************************************************************
 * gobang.hpp
+*
+* NOTICE:
+* Please define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING at the begining
+* of your source code.
 *****************************************************************************/
+
 
 #include <array>
 #include <vector>
 #include <thread>
 
-#define _SILENCE_AMP_DEPRECATION_WARNINGS
+//#define _SILENCE_AMP_DEPRECATION_WARNINGS
 //#include <amp.h>
 
 namespace gobang
@@ -44,6 +49,8 @@ namespace gobang
 		std::array<int, 15> null_array;
 	public:
 		std::array<std::array<int, 15>, 15> map;
+
+		Board() {}
 
 		bool empty()
 		{
@@ -121,16 +128,80 @@ namespace gobang
 			}
 			return res;
 		}
-		int find_fast(const std::vector<int>& str, bool recursion = false)
+#if def AMP_H
+		int find_(std::vector<int> str, bool recursion = false)
 		{
-			//using namespace Concurrency;
-			//if (str.size() == 0)return 0;
+			using namespace Concurrency;
+			if (str.size() == 0)return 0;
 			//准备
 			//std::vector<int> res(15 * 15);
-			//array_view<int, 2> res_gpu(15, 15, res);
-			//res_gpu.discard_data();
-			return 0;
+			int res[15 * 15] = { 0 };
+			//展开map
+			std::vector<int> map_;
+			for (int x = 0; x < 15; x++)
+			{
+				for (int y = 0; y < 15; y++)map_.push_back(map[x][y]);
+			}
+			array_view<int, 2> res_gpu(15, 15, res);
+			array_view<int, 2> map_gpu(15, 15, map_);
+			array_view<int, 1> str_gpu(str.size(), str);
+			res_gpu.discard_data();
+			//GPU，启动！
+			/*parallel_for_each(
+				res_gpu.extent,
+				[=](index<2> idx) restrict(amp)
+				{
+					bool ok_0, ok_1, ok_2, ok_3;
+					ok_0 = ok_1 = ok_2 = ok_3 = true;
+					int x = idx[0], y = idx[1];
+					//在此位置查找结构
+					for (int i = 0; i < str_gpu.extent[0]; i++)
+					{
+						if (x + i >= 15) ok_0 = false;
+						else ok_0 &= map_gpu[x + i][y] == str_gpu[i];
+
+						if (y + i >= 15) ok_1 = false;
+						else ok_1 &= map_gpu[x][y + i] == str_gpu[i];
+
+						if (x + i >= 15 || y + i >= 15) ok_2 = false;
+						else ok_2 &= map_gpu[x + i][y + i] == str_gpu[i];
+
+						if (x + i >= 15 || y - i < 0) ok_3 = false;
+						else ok_3 &= map_gpu[x + i][y - i] == str_gpu[i];
+					}
+					if (ok_0)res_gpu[idx]++;
+					if (ok_1)res_gpu[idx]++;
+					if (ok_2)res_gpu[idx]++;
+					if (ok_3)res_gpu[idx]++;
+				}
+			);*/
+			res_gpu.synchronize();
+			int res_ = 0;
+			for (int i = 0; i < 15 * 15; i++)
+			{
+				res_ += res[i];
+			}
+			//如果不对称，还要反着来一遍
+			if (!recursion)
+			{
+				bool symmetry = true;//是否对称
+				for (int i = 0; i < str.size() / 2; i++)
+				{
+					symmetry &= str[i] == str[str.size() - i - 1];
+				}
+				if (!symmetry)
+				{
+					std::vector<int> trs(str.size());
+					for (int i = 0; i < str.size(); i++)
+					{
+						trs[i] = str[str.size() - i - 1];
+					}
+					res_ += find(trs, true);
+				}
+			}
+			return res_;
 		}
+#endif
 		//在棋盘中寻找某一线形结构, 返回数目
 		//str: o表示颜色为p的棋子，x表示反色的棋子或边界，-表示空位
 		int find(const std::string& str, int col)
@@ -240,5 +311,3 @@ namespace gobang
 		virtual std::array<int, 2> play(Board bd, int self, bool forbidden = true) = 0;
 	};
 }
-
-#include "basic_fish.hpp"
