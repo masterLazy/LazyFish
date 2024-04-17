@@ -1,12 +1,11 @@
-﻿//(Release)C/C++/优化/优化: 已禁用(/Od)
-#include <Windows.h>
-#include <vfw.h>
+﻿#include <Windows.h>
 #include <windowsx.h>
 #include <atomic>
 
 #include "../mLib/mGraphics.h"
 
 #include "gobang.hpp"
+#include "basic_fish.hpp"
 
 using namespace mlib;
 using namespace gobang;
