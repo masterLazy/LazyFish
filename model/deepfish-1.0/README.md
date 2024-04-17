@@ -1,11 +1,21 @@
 # DeepFish-1.0
 
-参数量：`78,497`。
+参数量：`78,947`。
 
-采用 CNN 结构，在仓库中的数据集上训练，在测试集上准确率为 `100%`。
+采用 CNN 结构，在仓库中提供的数据集上训练。
+
+```
+Test Error:
+ Accuracy: 100.0%, Avg loss: 0.003641
+```
 
 ### 训练超参数
 
-误差函数：`nn.MSELoss()`；优化器：`torch.optim.Adam()`
+```python
+batch_size = 512
+learning_rate = 0.0001
+epochs = 10
+loss_fn = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+```
 
-学习率：`0.0001`；轮数：`5`

@@ -1,4 +1,4 @@
-﻿# DeepFish Model
+﻿# DeepFish-1.0
 
 import torch
 from torch import nn
