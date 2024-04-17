@@ -35,7 +35,7 @@ LazyFish 尚未完善。
 
 ## DeepFish 输入约定
 
-DeepFish 的输入 `shape` 是：`(1,15,15)`
+DeepFish 的输入 `shape` 是：`(1,1,15,15)`
 
 `0` = 空位
 
