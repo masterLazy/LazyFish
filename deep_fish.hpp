@@ -35,7 +35,13 @@ namespace gobang
 		c10::Device::Type device;
 	public:
 		torch::jit::script::Module model;
+		DeepFish() {}
 		explicit DeepFish(std::string model_path)
+		{
+			load(model_path);
+		}
+
+		bool load(std::string model_path)
 		{
 			//加载模型
 			try
@@ -45,7 +51,7 @@ namespace gobang
 			catch (const c10::Error& e)
 			{
 				std::cerr << "[DeepFish] Error loading model: " << e.what() << std::endl;
-				exit(-1);
+				return false;
 			}
 			auto parameters = model.parameters();
 			//计算参数总数
@@ -63,10 +69,16 @@ namespace gobang
 			{
 				device = c10::Device::Type::CPU;
 			}
+			return true;
 		}
 
 		std::array<int, 2> play(Board bd, int self, bool fbd = true)
 		{
+			if (num_params == 0)
+			{
+				std::cerr << "[DeepFish] Error predicting: Model not loaded.";
+				return { -1,-1 };
+			}
 			//准备输入
 			auto map = torch::zeros({ 15,15 });
 			for (int x = 0; x < 15; x++)
@@ -87,8 +99,8 @@ namespace gobang
 			}
 			catch (const std::exception& e)
 			{
-				std::cerr << "[DeepFish] Error predicting :" << e.what() << std::endl;
-				exit(-1);
+				std::cerr << "[DeepFish] Error predicting: " << e.what() << std::endl;
+				return { -1,-1 };
 			}
 			auto pred_ = pred.toTensor();
 
@@ -106,11 +118,13 @@ namespace gobang
 						{
 							_x = x;
 							_y = y;
+							max_ = n;
 						}
 						else if (n == max_ && rand() % 15 * 15 == 0)
 						{
 							_x = x;
 							_y = y;
+							max_ = n;
 						}
 					}
 				}
