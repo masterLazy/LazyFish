@@ -27,6 +27,11 @@ LazyFish 尚未完善。
 
 `model/` 下存储了 DeepFish 的模型文件（`.pth`）、序列化模型文件（`.pt`）和定义它们的 Python 源代码。
 
+### 数据集
+
+`dataset/x_train.npz` `dataset/y_train.npz`：训练集，大小为 `258,280`。
+`dataset/x_test.npz` `dataset/y_test.npz`：验证集，大小为 `26,263`。
+
 ## DeepFish 输入约定
 
 DeepFish 的输入 `shape` 是：`(1,15,15)`
