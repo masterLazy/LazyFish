@@ -22,11 +22,11 @@ namespace gobang
 	const int G_WHITE = 2;
 
 	//·´×ªÑÕÉ«
-	int Invert(int p)
+	int Invert(int col)
 	{
-		if (p == G_WHITE)return G_BLACK;
-		else if (p == G_BLACK)return G_WHITE;
-		return p;
+		if (col == G_WHITE)return G_BLACK;
+		else if (col == G_BLACK)return G_WHITE;
+		return col;
 	}
 
 	//ÆåÅÌ
