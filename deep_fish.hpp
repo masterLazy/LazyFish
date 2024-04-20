@@ -31,17 +31,17 @@ namespace gobang
 	class DeepFish :Fish
 	{
 	private:
-		size_t num_params;
-		c10::Device::Type device;
+		size_t num_params = 0;
+		c10::DeviceType device;
 	public:
 		torch::jit::script::Module model;
 		DeepFish() {}
-		explicit DeepFish(std::string model_path)
+		explicit DeepFish(std::string model_path, bool warm_up = true)
 		{
-			load(model_path);
+			load(model_path, warm_up);
 		}
 
-		bool load(std::string model_path)
+		bool load(std::string model_path, bool warm_up = true)
 		{
 			//加载模型
 			try
@@ -62,12 +62,17 @@ namespace gobang
 			}
 			if (torch::cuda::is_available())
 			{
-				device = c10::Device::Type::CUDA;
+				device = c10::DeviceType::CUDA;
 				model.to(device);
 			}
 			else
 			{
-				device = c10::Device::Type::CPU;
+				device = c10::DeviceType::CPU;
+			}
+			//第一次使用模型预测会有点慢，所以这里预热一下
+			if (warm_up)
+			{
+				model({ torch::zeros({1,1,15,15}).to(device) });
 			}
 			return true;
 		}
@@ -130,6 +135,11 @@ namespace gobang
 				}
 			}
 			return { _x,_y };
+		}
+
+		c10::DeviceType get_device()
+		{
+			return device;
 		}
 	};
 }
