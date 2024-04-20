@@ -36,22 +36,21 @@ PYBIND11_MODULE(gobang, m)
 		.def("__getitem__", [](gobang::Board& bd, std::pair<int, int> idx)
 			{
 				return bd[idx.first][idx.second];
-			}, py::keep_alive<0, 1>())
+			})
 		.def("__setitem__", [](gobang::Board& bd, std::pair<int, int> idx, int value)
 			{
 				bd[idx.first][idx.second] = value;
-			}, py::keep_alive<0, 1>())
+			})
 		.def("as_numpy", [](gobang::Board& bd)
 			{
-				py::array_t<int> arr({ 15,15 });
+				py::array_t<int> arr({ 15,15 }, { sizeof(int), 15 * sizeof(int) });
 				auto buf = arr.request();
 				auto ptr = (int*)buf.ptr;
-				auto strides = buf.strides;
 				for (int x = 0; x < 15; x++)
 				{
 					for (int y = 0; y < 15; y++)
 					{
-						auto element = ptr + x * strides[0] + y * strides[1];
+						auto element = ptr + x * 15 + y;
 						*element = bd[x][y];
 					}
 				}
