@@ -62,6 +62,6 @@ loss_fn = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 ```
 
-### 实测评价
+### 评价
 
 具有一定的棋力，验证了模型的可行性，但是还不如 BasicFish，有点傻。
