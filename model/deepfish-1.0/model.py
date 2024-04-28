@@ -5,7 +5,7 @@ from torch import nn
 
 
 class Model(nn.Module):
-    def __init__(self, width):
+    def __init__(self):
         super(Model, self).__init__()
 
         self.seq = nn.Sequential(
