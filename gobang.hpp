@@ -12,9 +12,6 @@
 #include <vector>
 #include <thread>
 
-//#define _SILENCE_AMP_DEPRECATION_WARNINGS
-//#include <amp.h>
-
 namespace gobang
 {
 	const int G_EMPTY = 0;
@@ -47,6 +44,12 @@ namespace gobang
 		}
 
 		std::array<int, 15> null_array;
+
+		//检测某个下标是否在范围内
+		bool safe(int x, int y)
+		{
+			return x >= 0 && x < 15 && y >= 0 && y < 15;
+		}
 	public:
 		std::array<std::array<int, 15>, 15> map;
 
@@ -84,31 +87,28 @@ namespace gobang
 			if (str.size() == 0)return 0;
 			//遍历
 			int res = 0;
-			bool ok_0, ok_1, ok_2, ok_3;
+			bool match[4];
 			for (int x = 0; x < 15; x++)
 			{
 				for (int y = 0; y < 15; y++)
 				{
-					ok_0 = ok_1 = ok_2 = ok_3 = true;
+					for (bool& b : match)b = true;
 					//在此位置查找结构
 					for (int i = 0; i < str.size(); i++)
 					{
-						if (x + i >= 15) ok_0 = false;
-						else ok_0 &= map[x + i][y] == str[i];
+						if (!safe(x + i, y)) match[0] = false;
+						else match[0] &= map[x + i][y] == str[i];
 
-						if (y + i >= 15) ok_1 = false;
-						else ok_1 &= map[x][y + i] == str[i];
+						if (!safe(x, y + i)) match[1] = false;
+						else match[1] &= map[x][y + i] == str[i];
 
-						if (x + i >= 15 || y + i >= 15) ok_2 = false;
-						else ok_2 &= map[x + i][y + i] == str[i];
+						if (!safe(x + i, y + i)) match[2] = false;
+						else match[2] &= map[x + i][y + i] == str[i];
 
-						if (x + i >= 15 || y - i < 0) ok_3 = false;
-						else ok_3 &= map[x + i][y - i] == str[i];
+						if (!safe(x + i, y - i)) match[3] = false;
+						else match[3] &= map[x + i][y - i] == str[i];
 					}
-					if (ok_0)res++;
-					if (ok_1)res++;
-					if (ok_2)res++;
-					if (ok_3)res++;
+					for (bool b : match)if (b)res++;
 				}
 			}
 			//如果不对称，还要反着来一遍
@@ -131,58 +131,34 @@ namespace gobang
 			}
 			return res;
 		}
-#if def AMP_H
-		int find_(std::vector<int> str, bool recursion = false)
+		//在棋盘中的某一位置寻找某一线形结构, 返回数目
+		int find_at(const std::vector<int>& str, std::pair<int, int> where, bool recursion = false)
 		{
-			using namespace Concurrency;
 			if (str.size() == 0)return 0;
-			//准备
-			//std::vector<int> res(15 * 15);
-			int res[15 * 15] = { 0 };
-			//展开map
-			std::vector<int> map_;
-			for (int x = 0; x < 15; x++)
+			int x = where.first, y = where.second;
+			//遍历
+			int res = 0;
+			bool match[4] = { true };
+			//i 代表结构的起始位置
+			for (int i = 1 - str.size(); i <= 0; i++)
 			{
-				for (int y = 0; y < 15; y++)map_.push_back(map[x][y]);
-			}
-			array_view<int, 2> res_gpu(15, 15, res);
-			array_view<int, 2> map_gpu(15, 15, map_);
-			array_view<int, 1> str_gpu(str.size(), str);
-			res_gpu.discard_data();
-			//GPU，启动！
-			/*parallel_for_each(
-				res_gpu.extent,
-				[=](index<2> idx) restrict(amp)
+				for (bool& b : match)b = true;
+				//在此位置查找结构
+				for (int j = 0; j < str.size(); j++)
 				{
-					bool ok_0, ok_1, ok_2, ok_3;
-					ok_0 = ok_1 = ok_2 = ok_3 = true;
-					int x = idx[0], y = idx[1];
-					//在此位置查找结构
-					for (int i = 0; i < str_gpu.extent[0]; i++)
-					{
-						if (x + i >= 15) ok_0 = false;
-						else ok_0 &= map_gpu[x + i][y] == str_gpu[i];
+					if (!safe(x + i + j, y)) match[0] = false;
+					else match[0] &= map[x + i + j][y] == str[j];
 
-						if (y + i >= 15) ok_1 = false;
-						else ok_1 &= map_gpu[x][y + i] == str_gpu[i];
+					if (!safe(x, y + i + j)) match[1] = false;
+					else match[1] &= map[x][y + i + j] == str[j];
 
-						if (x + i >= 15 || y + i >= 15) ok_2 = false;
-						else ok_2 &= map_gpu[x + i][y + i] == str_gpu[i];
+					if (!safe(x + i + j, y + i + j)) match[2] = false;
+					else match[2] &= map[x + i + j][y + i + j] == str[j];
 
-						if (x + i >= 15 || y - i < 0) ok_3 = false;
-						else ok_3 &= map_gpu[x + i][y - i] == str_gpu[i];
-					}
-					if (ok_0)res_gpu[idx]++;
-					if (ok_1)res_gpu[idx]++;
-					if (ok_2)res_gpu[idx]++;
-					if (ok_3)res_gpu[idx]++;
+					if (!safe(x + i + j, y + i - j)) match[3] = false;
+					else match[3] &= map[x + i - j][y - i - j] == str[j];
 				}
-			);*/
-			res_gpu.synchronize();
-			int res_ = 0;
-			for (int i = 0; i < 15 * 15; i++)
-			{
-				res_ += res[i];
+				for (bool b : match)if (b)res++;
 			}
 			//如果不对称，还要反着来一遍
 			if (!recursion)
@@ -199,14 +175,14 @@ namespace gobang
 					{
 						trs[i] = str[str.size() - i - 1];
 					}
-					res_ += find(trs, true);
+					res += find_at(trs, where, true);
 				}
 			}
-			return res_;
+			return res;
 		}
-#endif
+
 		//在棋盘中寻找某一线形结构, 返回数目
-		//str: o表示颜色为p的棋子，x表示反色的棋子或边界，-表示空位
+		//str: o表示颜色为col的棋子，x表示反色的棋子或边界，-表示空位
 		int find(const std::string& str, int col)
 		{
 			std::vector<int> temp;
@@ -231,6 +207,33 @@ namespace gobang
 			}
 			if (temp.size() > 15)temp.resize(15);
 			return find(temp);
+		}
+		//在棋盘中的某一位置寻找某一线形结构, 返回数目
+		//str: o表示颜色为col的棋子，x表示反色的棋子或边界，-表示空位
+		int find_at(const std::string& str, std::pair<int, int> where, int col)
+		{
+			std::vector<int> temp;
+			for (char c : str)
+			{
+				switch (c)
+				{
+				case 'o':
+				case 'O':
+					temp.push_back(col);
+					break;
+
+				case 'x':
+				case 'X':
+					temp.push_back(Invert(col));
+					break;
+
+				case '-':
+					temp.push_back(G_EMPTY);
+					break;
+				}
+			}
+			if (temp.size() > 15)temp.resize(15);
+			return find_at(temp, where);
 		}
 
 		//获取获胜者(若没有，返回0)

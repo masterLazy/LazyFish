@@ -4,6 +4,7 @@
 *****************************************************************************/
 
 #include "gobang.hpp"
+#include <random>
 
 #ifndef max
 template<typename T>
@@ -21,9 +22,9 @@ namespace gobang
 		int try_find(Board bd, int x, int y, int col, std::string str)
 		{
 			int h0 = bd[x][y];
-			int cnt0 = bd.find(str, col);
+			int cnt0 = bd.find_at(str, { x,y }, col);
 			bd[x][y] = col;
-			int cnt1 = bd.find(str, col);
+			int cnt1 = bd.find_at(str, { x,y }, col);
 			bd[x][y] = h0;
 			return cnt1 - cnt0;
 		}
@@ -33,7 +34,8 @@ namespace gobang
 			return x >= 0 && x < 15 && y >= 0 && y < 15;
 		}
 	public:
-		std::array<int, 2> play(Board bd, int self, bool fbd = true)
+		//[0,1]的预测矩阵
+		std::array<std::array<float, 15>, 15> predict(Board bd, int self, float noise = 0)
 		{
 			//用于记录在每个点下棋的合适度
 			int m[15][15];
@@ -51,7 +53,7 @@ namespace gobang
 				for (int y = 0; y < 15; y++)
 				{
 					//攻击
-					if (bd.is_able(x, y, self, fbd))
+					if (bd.is_able(x, y, self))
 					{
 						//我方在这里下子后连五: 8
 						if (try_find(bd, x, y, self, "ooooo") > 0)
@@ -282,29 +284,61 @@ namespace gobang
 				}
 			}
 
+			//添加噪声
+			std::default_random_engine generator;
+			std::normal_distribution<double> distribution(0.0, noise);
+			for (int x = 0; x < 15; x++)
+			{
+				for (int y = 0; y < 15; y++)
+				{
+					m[x][y] += round(distribution(generator));
+				}
+			}
+
+			//Softmax
+			float sum = 0;
+			std::array<std::array<float, 15>, 15> res;
+			for (int x = 0; x < 15; x++)
+			{
+				for (int y = 0; y < 15; y++)
+				{
+					sum += exp(m[x][y]);
+				}
+			}
+			for (int x = 0; x < 15; x++)
+			{
+				for (int y = 0; y < 15; y++)
+				{
+					res[x][y] = exp(m[x][y]) / sum;
+				}
+			}
+			return res;
+		}
+		//获取着子位置
+		std::array<int, 2> play(Board bd, int self, int noise, bool fbd = true)
+		{
+			auto pred = predict(bd, self, noise);
+
 			//在最合适的地方下棋
 			int _x = -1, _y = -1;
 			for (int x = 0; x < 15; x++)
 			{
 				for (int y = 0; y < 15; y++)
 				{
-					if (bd.is_able(x, y, self, fbd))
+					if (bd.is_able(x, y, self, fbd) &&
+						(_x == -1 || pred[x][y] > pred[_x][_y]))
 					{
-						if (_x == -1 || m[x][y] > m[_x][_y])
-						{
-							_x = x;
-							_y = y;
-						}
-						else if (m[x][y] == m[_x][_y] && rand() % 15 * 15 == 0)
-						{
-							_x = x;
-							_y = y;
-						}
+						_x = x;
+						_y = y;
 					}
 				}
 			}
 
 			return { _x,_y };
+		}
+		std::array<int, 2> play(Board bd, int self, bool fbd = true)
+		{
+			return play(bd, self, 0, fbd);
 		}
 	};
 }

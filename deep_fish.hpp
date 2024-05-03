@@ -77,7 +77,9 @@ namespace gobang
 			return true;
 		}
 
-		std::array<int, 2> play(Board bd, int self, bool fbd = true)
+
+		//[0,1]的预测矩阵
+		std::array<std::array<float, 15>, 15> predict(Board bd, int self)
 		{
 			if (num_params == 0)
 			{
@@ -110,30 +112,37 @@ namespace gobang
 			auto pred_ = pred.toTensor();
 
 			//获得输出
-			float max_ = 0;
+			std::array<std::array<float, 15>, 15> res;
+			for (int x = 0; x < 15; x++)
+			{
+				for (int y = 0; y < 15; y++)
+				{
+					auto n = pred_[0][0][x][y].item().toFloat();
+					res[x][y] = n;
+				}
+			}
+			return res;
+		}
+		//获取着子位置
+		std::array<int, 2> play(Board bd, int self, bool fbd = true)
+		{
+			auto pred = predict(bd, self);
+
+			//在最合适的地方下棋
 			int _x = -1, _y = -1;
 			for (int x = 0; x < 15; x++)
 			{
 				for (int y = 0; y < 15; y++)
 				{
-					if (bd.is_able(x, y, self, fbd))
+					if (bd.is_able(x, y, self, fbd) &&
+						(_x == -1 || pred[x][y] > pred[_x][_y]))
 					{
-						auto n = pred_[0][0][x][y].item().toFloat();
-						if (_x == -1 || n > max_)
-						{
-							_x = x;
-							_y = y;
-							max_ = n;
-						}
-						else if (n == max_ && rand() % 15 * 15 == 0)
-						{
-							_x = x;
-							_y = y;
-							max_ = n;
-						}
+						_x = x;
+						_y = y;
 					}
 				}
 			}
+
 			return { _x,_y };
 		}
 
