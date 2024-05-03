@@ -3,7 +3,6 @@
 五子棋 AI。
 
 ## 介绍
-
 "LazyFish" 这个名字的灵感来自于 StockFish。LazyFish 包括两个版本：基于搜索和统计算法的 BasicFish，以及基于深度学习的 DeepFish。
 
 LazyFish 尚未完善。
@@ -18,7 +17,7 @@ LazyFish 尚未完善。
 
 `deep_fish.hpp` 实现了一个接口 `DeepFish`，允许用户加载和使用 DeepFish 模型（必须是序列化后的 `.pt` 文件）。要运行这个源文件，你需要先安装 LibTorch（PyTorch 的 C++ 接口）。
 
-`dataset_maker.cpp` 是一个用于制造两个 BasicFish 之间互相对弈的数据集的程序。`dataset/` 下存储了用它制造的数据集（`.npz` 格式）
+`dataset_demo.cpp` 是一个用于制造 BasicFish 之间互相对弈的数据集的程序。
 
 `gui_demo.cpp` 是一个图形化下棋程序，要运行它，你需要安装 `mLib`（见我的仓库：[mLib](https://github.com/masterLazy/mLib)）。
 
@@ -28,7 +27,7 @@ LazyFish 尚未完善。
 
 `gobang.pyd` 是 `gobang::Board` 的 Python 接口。
 
-`train.py` 是一个训练程序，包括读取 `dataset_maker.cpp` 制造的数据并存储为 `.npz`、扩展数据集以及训练过程。
+`dataset_demo.py` 提供了一个加载并扩展本仓库提供的数据集的接口。
 
 ### 模型文件
 
@@ -36,9 +35,7 @@ LazyFish 尚未完善。
 
 ### 数据集
 
-`dataset/x_train.npz` `dataset/y_train.npz`：训练集，大小为 `258,280`。
-
-`dataset/x_test.npz` `dataset/y_test.npz`：验证集，大小为 `26,263`。
+见 `dataset/` 。
 
 ## DeepFish 输入约定
 
