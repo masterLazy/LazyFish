@@ -17,17 +17,9 @@ LazyFish 尚未完善。
 
 `deep_fish.hpp` 实现了一个接口 `DeepFish`，允许用户加载和使用 DeepFish 模型（必须是序列化后的 `.pt` 文件）。要运行这个源文件，你需要先安装 LibTorch（PyTorch 的 C++ 接口）。
 
-`dataset_demo.cpp` 是一个用于制造 BasicFish 之间互相对弈的数据集的程序。
-
-`gui_demo.cpp` 是一个图形化下棋程序，要运行它，你需要安装 `mLib`（见我的仓库：[mLib](https://github.com/masterLazy/mLib)）。
-
-`bind.cpp` 是用于为 `gobang::Board` 创建 Python 接口绑定的程序（使用 pybind11）。
-
-<hr/>
-
 `gobang.pyd` 是 `gobang::Board` 的 Python 接口。
 
-`dataset_demo.py` 提供了一个加载并扩展本仓库提供的数据集的接口。
+程序示例见 `demo/`。
 
 ### 模型文件
 
