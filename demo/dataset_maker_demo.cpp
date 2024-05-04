@@ -62,8 +62,6 @@ void make(int len, int number)
 				pred = bf.play(board, current_player);
 			}
 		}
-		board[pred[0]][pred[1]] = current_player;
-		current_player = Invert(current_player);
 		//写入y.dat
 		for (int x = 0; x < 15; x++)
 		{
@@ -77,6 +75,9 @@ void make(int len, int number)
 				}
 			}
 		}
+		//切换当前玩家
+		board[pred[0]][pred[1]] = current_player;
+		current_player = Invert(current_player);
 		y_temp[current_player - 1] += "\n";
 		//看看是不是结束了
 		if (board.is_end())
@@ -90,11 +91,14 @@ void make(int len, int number)
 			y_temp[1].clear();
 
 			board.clear();
+			current_player = G_BLACK;
 			cnt++;
 			total++;
 		}
 	}
 }
+
+int each_thread_goal = 1000;
 
 int main()
 {
@@ -105,18 +109,20 @@ int main()
 
 	for (int i = 0; i < 10; i++)
 	{
-		threads.push_back(thread(make, 1000, i));
+		threads.push_back(thread(make, each_thread_goal, i));
 		threads.back().detach();
 	}
 
 	clock_t timer = clock();
-	while (total < 10 * 1000)
+	while (total < 10 * each_thread_goal)
 	{
 		cout << "\r";
-		mlib::printPB(total / (10.0 * 1000), mlib::PBStyle::block);
-		cout << " " << total << "/" << 10 * 1000 << ", avg " << float(clock() - timer) / total / 1000.0 << " s/game";
+		mlib::printPB(total / (10.0 * each_thread_goal), mlib::PBStyle::block);
+		cout << " " << total << "/" << 10 * 1000
+			<< ", avg " << float(clock() - timer) / total / 1000.0 << " s/game"
+			<< ", ert " << float(clock() - timer) / total / 1000.0 * (10 * each_thread_goal - total) / 60 << " min";
 
-		Sleep(100);
+		Sleep(1000);
 	}
 
 	return 0;
