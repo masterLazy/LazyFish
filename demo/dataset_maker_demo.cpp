@@ -24,7 +24,6 @@ void make(int len, int number)
 	array<int, 2> pred;
 	int cnt = 0;//已保存的游戏局数
 	int t = 0;//当前局步数
-	int noisy_player = G_BLACK;//带噪声的玩家
 	//缓存
 	string x_temp[2], y_temp[2];
 	//迭代棋局
@@ -53,14 +52,7 @@ void make(int len, int number)
 		}
 		else
 		{
-			if (t > 5 && current_player == noisy_player)
-			{
-				pred = bf.play(board, current_player, 1);
-			}
-			else
-			{
-				pred = bf.play(board, current_player);
-			}
+			pred = bf.play(board, current_player);
 		}
 		//写入y
 		for (int x = 0; x < 15; x++)
@@ -96,7 +88,6 @@ void make(int len, int number)
 
 			board.clear();
 			current_player = G_BLACK;
-			noisy_player = Invert(noisy_player);
 			cnt++;
 			total++;
 		}
