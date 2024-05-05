@@ -1,5 +1,4 @@
-﻿//(Release)C/C++/优化/优化: 已禁用(/Od)
-#include <iostream>
+﻿#include <iostream>
 #include <fstream>
 #include <atomic>
 #include <thread>
@@ -25,21 +24,22 @@ void make(int len, int number)
 	array<int, 2> pred;
 	int cnt = 0;//已保存的游戏局数
 	int t = 0;//当前局步数
+	int noisy_player = G_BLACK;//带噪声的玩家
 	//缓存
 	string x_temp[2], y_temp[2];
 	//迭代棋局
 	int current_player = G_BLACK;
 	while (cnt < len)
 	{
-		//写入x.dat
+		//写入x
 		for (int x = 0; x < 15; x++)
 		{
 			for (int y = 0; y < 15; y++)
 			{
 				if (board[x][y] == current_player) x_temp[current_player - 1] += "0.5";
-				else if (board[x][y] == G_EMPTY)x_temp[current_player - 1] += "0.0";
+				else if (board[x][y] == G_EMPTY) x_temp[current_player - 1] += "0.0";
 				else x_temp[current_player - 1] += "1.0";
-				if (x * y != 14 * 14)
+				if (x * y < 14 * 14)
 				{
 					x_temp[current_player - 1] += ",";
 				}
@@ -53,7 +53,7 @@ void make(int len, int number)
 		}
 		else
 		{
-			if (t > 5)
+			if (t > 5 && current_player == noisy_player)
 			{
 				pred = bf.play(board, current_player, 1);
 			}
@@ -62,28 +62,32 @@ void make(int len, int number)
 				pred = bf.play(board, current_player);
 			}
 		}
-		//写入y.dat
+		//写入y
 		for (int x = 0; x < 15; x++)
 		{
 			for (int y = 0; y < 15; y++)
 			{
-				if (pred[0] == x && pred[1] == y)y_temp[current_player - 1] += "1";
+				if (pred[0] == x && pred[1] == y) y_temp[current_player - 1] += "1";
 				else y_temp[current_player - 1] += "0";
-				if (x * y != 14 * 14)
+				if (x * y < 14 * 14)
 				{
 					y_temp[current_player - 1] += ",";
 				}
 			}
 		}
-		//切换当前玩家
+		y_temp[current_player - 1] += "\n";
+		//着子，切换当前玩家
 		board[pred[0]][pred[1]] = current_player;
 		current_player = Invert(current_player);
-		y_temp[current_player - 1] += "\n";
 		//看看是不是结束了
 		if (board.is_end())
 		{
-			xout << x_temp[board.get_winner() - 1];
-			yout << y_temp[board.get_winner() - 1];
+			int winner = board.get_winner();
+			if (winner != 0)
+			{
+				xout << x_temp[winner - 1];
+				yout << y_temp[winner - 1];
+			}
 
 			x_temp[0].clear();
 			x_temp[1].clear();
@@ -92,13 +96,14 @@ void make(int len, int number)
 
 			board.clear();
 			current_player = G_BLACK;
+			noisy_player = Invert(noisy_player);
 			cnt++;
 			total++;
 		}
 	}
 }
 
-int each_thread_goal = 1000;
+int each_thread_goal = 2000;
 
 int main()
 {
@@ -118,11 +123,11 @@ int main()
 	{
 		cout << "\r";
 		mlib::printPB(total / (10.0 * each_thread_goal), mlib::PBStyle::block);
-		cout << " " << total << "/" << 10 * 1000
-			<< ", avg " << float(clock() - timer) / total / 1000.0 << " s/game"
-			<< ", ert " << float(clock() - timer) / total / 1000.0 * (10 * each_thread_goal - total) / 60 << " min";
+		cout << " " << total << "/" << 10 * each_thread_goal
+			<< ", avg " << float(clock() - timer) / total / 1000 << " s/game"
+			<< ", ert " << float(clock() - timer) / total / 1000 * (10 * each_thread_goal - total) / 60 << " min";
 
-		Sleep(1000);
+		Sleep(100);
 	}
 
 	return 0;
