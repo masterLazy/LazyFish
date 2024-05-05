@@ -5,7 +5,7 @@
 ## 介绍
 "LazyFish" 这个名字的灵感来自于 StockFish。LazyFish 包括两个版本：基于搜索和统计算法的 BasicFish，以及基于深度学习的 DeepFish。
 
-LazyFish 尚未完善。
+LazyFish 持续开发中。
 
 ## 文件介绍
 
