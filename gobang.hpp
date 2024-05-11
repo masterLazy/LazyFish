@@ -30,16 +30,16 @@ namespace gobang
 	class Board
 	{
 	private:
-		int find_fbd()
+		int find_fbd(int x, int y)
 		{
 			int res = 0, b = G_BLACK;
 			//活三
-			res += find("-ooo-", b);
+			res += find_at("-ooo-", { x,y }, b);
 			//活四 + 冲四
-			res += find("oooo-", b) - find("-oooo-", b);
+			res += find_at("oooo-", { x,y }, b) - find_at("-oooo-", { x,y }, b);
 			//嵌五
-			res += find("ooo-o-", b) + find("-ooo-o", b) - find("-ooo-o-", b);
-			res += find("oo-oo-", b) - find("-oo-oo-", b);
+			res += find_at("ooo-o-", { x,y }, b) + find_at("-ooo-o", { x,y }, b) - find_at("-ooo-o-", { x,y }, b);
+			res += find_at("oo-oo-", { x,y }, b) - find_at("-oo-oo-", { x,y }, b);
 			return res;
 		}
 
@@ -274,13 +274,13 @@ namespace gobang
 			//禁手
 			if (col == G_BLACK && fbd == true)
 			{
-				int cnt0 = find_fbd();
+				int cnt0 = find_fbd(x, y);
 
 				//试下
 				map[x][y] = col;
 
 				//长连
-				if (find("oooooo", col) > 0)
+				if (find_at("oooooo", { x,y }, col) > 0)
 				{
 					//还原
 					map[x][y] = G_EMPTY;
@@ -288,7 +288,7 @@ namespace gobang
 				}
 
 
-				int cnt1 = find_fbd();
+				int cnt1 = find_fbd(x, y);
 
 				if (cnt1 - cnt0 > 1)
 				{

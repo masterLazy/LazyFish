@@ -35,10 +35,10 @@ namespace gobang
 		}
 	public:
 		//[0,1]的预测矩阵
-		std::array<std::array<float, 15>, 15> predict(Board bd, int self, float noise = 0)
+		std::array<std::array<int, 15>, 15> predict(Board bd, int self, float noise = 0)
 		{
 			//用于记录在每个点下棋的合适度
-			int m[15][15];
+			std::array<std::array<int, 15>, 15> m;
 			//初始化
 			for (int x = 0; x < 15; x++)
 			{
@@ -295,27 +295,10 @@ namespace gobang
 				}
 			}
 
-			//Softmax
-			float sum = 0;
-			std::array<std::array<float, 15>, 15> res;
-			for (int x = 0; x < 15; x++)
-			{
-				for (int y = 0; y < 15; y++)
-				{
-					sum += exp(m[x][y]);
-				}
-			}
-			for (int x = 0; x < 15; x++)
-			{
-				for (int y = 0; y < 15; y++)
-				{
-					res[x][y] = exp(m[x][y]) / sum;
-				}
-			}
-			return res;
+			return m;
 		}
 		//获取着子位置
-		std::array<int, 2> play(Board bd, int self, int noise, bool fbd = true)
+		std::array<int, 2> play(Board bd, int self, float noise, bool fbd = true)
 		{
 			auto pred = predict(bd, self, noise);
 
@@ -331,6 +314,11 @@ namespace gobang
 						_x = x;
 						_y = y;
 					}
+					else if (bd.is_able(x, y, self, fbd) && _x != -1 && rand() % 5 == 1)
+					{
+						_x = x;
+						_y = y;
+					}
 				}
 			}
 
@@ -338,7 +326,7 @@ namespace gobang
 		}
 		std::array<int, 2> play(Board bd, int self, bool fbd = true)
 		{
-			return play(bd, self, 0, fbd);
+			return play(bd, self, 0.1, fbd);
 		}
 	};
 }
