@@ -35,10 +35,10 @@ namespace gobang
 		}
 	public:
 		//[0,1]的预测矩阵
-		std::array<std::array<int, 15>, 15> predict(Board bd, int self, float noise = 0)
+		std::array<std::array<float, 15>, 15> predict(Board bd, int self, float noise = 0)
 		{
 			//用于记录在每个点下棋的合适度
-			std::array<std::array<int, 15>, 15> m;
+			std::array<std::array<float, 15>, 15> m;
 			//初始化
 			for (int x = 0; x < 15; x++)
 			{
@@ -285,13 +285,17 @@ namespace gobang
 			}
 
 			//添加噪声
-			std::default_random_engine generator;
-			std::normal_distribution<double> distribution(0.0, noise);
-			for (int x = 0; x < 15; x++)
+			if (noise != 0)
 			{
-				for (int y = 0; y < 15; y++)
+				std::random_device rd;
+				std::default_random_engine generator(rd());
+				std::normal_distribution<float> distribution(0.0, noise);
+				for (int x = 0; x < 15; x++)
 				{
-					m[x][y] += round(distribution(generator));
+					for (int y = 0; y < 15; y++)
+					{
+						m[x][y] += round(distribution(generator));
+					}
 				}
 			}
 
@@ -314,11 +318,6 @@ namespace gobang
 						_x = x;
 						_y = y;
 					}
-					else if (bd.is_able(x, y, self, fbd) && _x != -1 && rand() % 5 == 1)
-					{
-						_x = x;
-						_y = y;
-					}
 				}
 			}
 
@@ -326,7 +325,7 @@ namespace gobang
 		}
 		std::array<int, 2> play(Board bd, int self, bool fbd = true)
 		{
-			return play(bd, self, 0.1, fbd);
+			return play(bd, self, 0.15, fbd);
 		}
 	};
 }
