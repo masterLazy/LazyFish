@@ -3,7 +3,11 @@
 五子棋 AI。
 
 ## 介绍
-"LazyFish" 这个名字的灵感来自于 StockFish。LazyFish 包括两个版本：基于搜索和统计算法的 BasicFish，以及基于深度学习的 DeepFish。
+"LazyFish" 这个名字的灵感来自于 StockFish。LazyFish 包括若干版本：
+
+1. 我开发的“经典”算法——BasicFish。
+2. 基于搜索算法的 ProFish。
+3. 基于深度学习的 DeepFish。
 
 LazyFish 持续开发中。
 
@@ -21,20 +25,14 @@ LazyFish 持续开发中。
 
 程序示例见 `demo/`。
 
-### 模型文件
-
-`model/` 下存储了 DeepFish 的模型文件（`.pth`）、序列化模型文件（`.pt`）和定义它们的 Python 源代码。
-
 ### 数据集
 
 见 `dataset/` 。
 
-## DeepFish 输入约定
+## BasicFish
 
-DeepFish 的输入 `shape` 是：`(1,1,15,15)`
+我编写的最早的五子棋算法，保留了“原味”，但是做了一些优化。具体介绍请见：[BasicFish](BASICFISH.md)。
 
-`0` = 空位
+## DeepFish
 
-`0.5` = 己方
-
-`1.0` = 敌方
+有关 DeepFish 的具体介绍请见`model/`。此目录下存储了 DeepFish 的模型文件（`.pth`）、序列化模型文件（`.pt`）和定义它们的 Python 源代码（还有一份 `README.md`）。
