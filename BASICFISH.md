@@ -26,7 +26,7 @@ BasicFish 的算法思想非常简单。
 
 为了适应制造数据集的需要，我于 2024 年对 BasicFish 的算法进行了优化，主要是优化了查找模式的算法，具体请见：
 
-[Optimize & Update](https://github.com/masterLazy/LazyFish/commit/537d08aaff6ec32dcc36879d9d8bed564e9641d4)，[优化BasicFish](https://github.com/masterLazy/LazyFish/commit/a365d7e4e7da1f1574f7cfe01d3b715f9507f73e)
+[Optimize & Update](https://github.com/masterLazy/LazyFish/commit/537d08aaff6ec32dcc36879d9d8bed564e9641d4)，[优化BasicFish](https://github.com/masterLazy/LazyFish/commit/a365d7e4e7da1f1574f7cfe01d3b715f9507f73e)，[修复BasicFish](https://github.com/masterLazy/LazyFish/commit/b5a3967506cd50f3ab65ab1572eb1a83afce6932)
 
 ### 局限性
 
