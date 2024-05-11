@@ -11,7 +11,6 @@ using namespace gobang;
 using namespace std;
 
 //五子棋
-Board board;
 BasicFish bf;
 
 atomic<int> total = 0;
@@ -27,9 +26,13 @@ void make(int len, int number)
 	//缓存
 	string x_temp[2], y_temp[2];
 	//迭代棋局
+	Board board;
 	int current_player = G_BLACK;
 	while (cnt < len)
-	{
+	{/*
+		system("cls");
+		cout << board;
+		Sleep(10);*/
 		//写入x
 		for (int x = 0; x < 15; x++)
 		{
@@ -48,7 +51,7 @@ void make(int len, int number)
 		//下棋
 		if (board.empty())
 		{
-			pred = { rand() % 13 + 1,rand() % 13 + 1 };
+			pred = { rand() % 3 + 6,rand() % 3 + 6 };
 		}
 		else
 		{
@@ -94,7 +97,8 @@ void make(int len, int number)
 	}
 }
 
-int each_thread_goal = 2000;
+int thread_num = 10;
+int each_thread_goal = 4000;
 
 int main()
 {
@@ -103,20 +107,20 @@ int main()
 
 	vector<thread> threads;
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < thread_num; i++)
 	{
 		threads.push_back(thread(make, each_thread_goal, i));
 		threads.back().detach();
 	}
 
 	clock_t timer = clock();
-	while (total < 10 * each_thread_goal)
+	while (total < thread_num * each_thread_goal)
 	{
 		cout << "\r";
-		mlib::printPB(total / (10.0 * each_thread_goal), mlib::PBStyle::block);
+		mlib::printPB(total / float(thread_num * each_thread_goal), mlib::PBStyle::block);
 		cout << " " << total << "/" << 10 * each_thread_goal
 			<< ", avg " << float(clock() - timer) / total / 1000 << " s/game"
-			<< ", ert " << float(clock() - timer) / total / 1000 * (10 * each_thread_goal - total) / 60 << " min";
+			<< ", ert " << float(clock() - timer) / total / 1000 * (thread_num * each_thread_goal - total) / 60 << " min";
 
 		Sleep(100);
 	}
