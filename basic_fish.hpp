@@ -7,8 +7,7 @@
 #include <random>
 
 #ifndef max
-template<typename T>
-inline T max(T a, T b)
+inline float max(float a, float b)
 {
 	return a > b ? a : b;
 }
