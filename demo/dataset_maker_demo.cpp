@@ -98,7 +98,7 @@ void make(int len, int number)
 }
 
 int thread_num = 10;
-int each_thread_goal = 4000;
+int each_thread_goal = 100;
 
 int main()
 {

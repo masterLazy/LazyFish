@@ -7,7 +7,7 @@
 * of your source code.
 *****************************************************************************/
 
-
+#include <iostream>
 #include <array>
 #include <vector>
 #include <thread>
@@ -307,6 +307,22 @@ namespace gobang
 		{
 			if (i < 15)return map[i];
 			else return null_array;
+		}
+
+		friend std::ostream& operator<<(std::ostream& os, const Board bd)
+		{
+			for (int y = 0; y < 15; y++)
+			{
+				for (int x = 0; x < 15; x++)
+				{
+					auto piece = bd.map[x][y];
+					if (piece == G_EMPTY)os << ". ";
+					else if (piece == G_BLACK)os << "o ";
+					else if (piece == G_WHITE)os << "x ";
+				}
+				os << std::endl;
+			}
+			return os;
 		}
 	};
 
