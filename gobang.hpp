@@ -1,6 +1,8 @@
 #pragma once
 /*****************************************************************************
 * gobang.hpp
+* 
+* Gobang SDK
 *
 * NOTICE:
 * Please define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING at the begining
@@ -155,8 +157,8 @@ namespace gobang
 					if (!safe(x + i + j, y + i + j)) match[2] = false;
 					else match[2] &= map[x + i + j][y + i + j] == str[j];
 
-					if (!safe(x + i + j, y + i - j)) match[3] = false;
-					else match[3] &= map[x + i - j][y - i - j] == str[j];
+					if (!safe(x + i + j, y - i - j)) match[3] = false;
+					else match[3] &= map[x + i + j][y - i - j] == str[j];
 				}
 				for (bool b : match)if (b)res++;
 			}
