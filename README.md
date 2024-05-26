@@ -6,8 +6,8 @@
 "LazyFish" 这个名字的灵感来自于 StockFish。LazyFish 包括若干版本：
 
 1. 我开发的“经典”算法——BasicFish。
-2. 完全基于深度学习的 DeepFish。
-3. 基于搜索算法的 [unnamed]Fish。
+2. 基于深度学习的 DeepFish。
+3. 基于搜索算法的 SeaFish。
 
 LazyFish 持续开发中。
 
