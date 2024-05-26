@@ -1,8 +1,8 @@
 #pragma once
 /*****************************************************************************
-* deep_fish.hpp
+* deep_ee.hpp
 * 
-* DeepFish
+* Deep Estimation Engine
 *****************************************************************************/
 
 #include <torch/torch.h>
@@ -30,15 +30,15 @@
 
 namespace gobang
 {
-	class DeepFish :Fish
+	class DeepEE
 	{
 	private:
 		size_t num_params = 0;
 		c10::DeviceType device;
 	public:
 		torch::jit::script::Module model;
-		DeepFish() {}
-		explicit DeepFish(std::string model_path, bool warm_up = true)
+		DeepEE() {}
+		explicit DeepEE(std::string model_path, bool warm_up = true)
 		{
 			load(model_path, warm_up);
 		}
@@ -52,7 +52,7 @@ namespace gobang
 			}
 			catch (const c10::Error& e)
 			{
-				std::cerr << "[DeepFish] Error loading model: " << e.what() << std::endl;
+				std::cerr << "[DeepEE] Error loading model: " << e.what() << std::endl;
 				return false;
 			}
 			auto parameters = model.parameters();
@@ -81,12 +81,12 @@ namespace gobang
 
 
 		//[0,1]的预测矩阵
-		std::array<std::array<float, 15>, 15> predict(Board bd, int self)
+		float predict(Board bd, int self)
 		{
 			if (num_params == 0)
 			{
-				std::cerr << "[DeepFish] Error predicting: Model not loaded.";
-				return { -1,-1 };
+				std::cerr << "[DeepEE] Error predicting: Model not loaded.";
+				return NAN;
 			}
 			//准备输入
 			auto map = torch::zeros({ 15,15 });
@@ -108,44 +108,10 @@ namespace gobang
 			}
 			catch (const std::exception& e)
 			{
-				std::cerr << "[DeepFish] Error predicting: " << e.what() << std::endl;
-				return { -1,-1 };
+				std::cerr << "[DeepEE] Error predicting: " << e.what() << std::endl;
+				return NAN;
 			}
-			auto pred_ = pred.toTensor();
-
-			//获得输出
-			std::array<std::array<float, 15>, 15> res;
-			for (int x = 0; x < 15; x++)
-			{
-				for (int y = 0; y < 15; y++)
-				{
-					auto n = pred_[0][0][x][y].item().toFloat();
-					res[x][y] = n;
-				}
-			}
-			return res;
-		}
-		//获取着子位置
-		std::array<int, 2> play(Board bd, int self, bool fbd = true)
-		{
-			auto pred = predict(bd, self);
-
-			//在最合适的地方下棋
-			int _x = -1, _y = -1;
-			for (int x = 0; x < 15; x++)
-			{
-				for (int y = 0; y < 15; y++)
-				{
-					if (bd.is_able(x, y, self, fbd) &&
-						(_x == -1 || pred[x][y] > pred[_x][_y]))
-					{
-						_x = x;
-						_y = y;
-					}
-				}
-			}
-
-			return { _x,_y };
+			return pred.toTensor().reshape({ 1 }).item().toFloat();
 		}
 
 		c10::DeviceType get_device()

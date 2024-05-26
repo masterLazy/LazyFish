@@ -96,7 +96,7 @@ namespace gobang
 						/*Att*/if (try_find(bd, x, y, self, "-ooo-") +
 							try_find(bd, x, y, self, "-oo-o-") > 0)
 						{
-							m[x][y] += 8;
+							m[x][y] += 6;
 						}
 						/*Dfs*/if (try_find(bd, x, y, enemy, "-ooo-") > 0)
 						{
@@ -107,7 +107,7 @@ namespace gobang
 							try_find(bd, x, y, self, "-oo--") +
 							try_find(bd, x, y, self, "-o-o-") > 0)
 						{
-							m[x][y] += 2;
+							m[x][y] += 3;
 						}
 						/*Dfs*/if (try_find(bd, x, y, enemy, "-oo--") > 0)
 						{
@@ -120,8 +120,7 @@ namespace gobang
 			//Ìí¼ÓÔëÉù
 			if (noise != 0)
 			{
-				std::random_device rd;
-				std::default_random_engine generator(rd());
+				std::default_random_engine generator(time(NULL));
 				std::normal_distribution<float> distribution(0.0, noise);
 				for (int x = 0; x < 15; x++)
 				{
