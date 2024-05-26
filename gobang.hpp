@@ -3,10 +3,6 @@
 * gobang.hpp
 * 
 * Gobang SDK
-*
-* NOTICE:
-* Please define _SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING at the begining
-* of your source code.
 *****************************************************************************/
 
 #include <iostream>
@@ -16,9 +12,9 @@
 
 namespace gobang
 {
-	const int G_EMPTY = 0;
-	const int G_BLACK = 1;
-	const int G_WHITE = 2;
+	const short G_EMPTY = 0;
+	const short G_BLACK = 1;
+	const short G_WHITE = 2;
 
 	//反转颜色
 	int Invert(int col)
@@ -45,7 +41,7 @@ namespace gobang
 			return res;
 		}
 
-		std::array<int, 15> null_array;
+		static std::array<short, 15> null_array;
 
 		//检测某个下标是否在范围内
 		bool safe(int x, int y)
@@ -53,7 +49,7 @@ namespace gobang
 			return x >= 0 && x < 15 && y >= 0 && y < 15;
 		}
 	public:
-		std::array<std::array<int, 15>, 15> map;
+		std::array<std::array<short, 15>, 15> map;
 
 		Board()
 		{
@@ -305,7 +301,7 @@ namespace gobang
 			return true;
 		}
 
-		std::array<int, 15>& operator[](unsigned i)
+		std::array<short, 15>& operator[](unsigned i)
 		{
 			if (i < 15)return map[i];
 			else return null_array;
